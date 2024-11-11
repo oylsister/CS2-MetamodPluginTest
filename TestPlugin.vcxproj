@@ -63,10 +63,29 @@
     <ClCompile Include="E:\Github\metamod\hl2sdks\hl2sdk-cs2\public\tier0\memoverride.cpp" />
     <ClCompile Include="E:\Github\metamod\hl2sdks\hl2sdk-cs2\tier1\convar.cpp" />
     <ClCompile Include="E:\Github\CS2-MetamodPluginTest\TestPlugin.cpp" />
+    <ClCompile Include="Event.cpp" />
+    <ClCompile Include="sdk\schema.cpp" />
+    <ClCompile Include="utils\plat_unix.cpp" />
+    <ClCompile Include="utils\plat_win.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="clientframe.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="netmessage.h" />
+    <ClInclude Include="sdk\entity\cbaseentity.h" />
+    <ClInclude Include="sdk\entity\cbaseplayercontroller.h" />
+    <ClInclude Include="sdk\entity\ccsplayercontroller.h" />
+    <ClInclude Include="sdk\schema.h" />
+    <ClInclude Include="serversideclient.h" />
+    <ClInclude Include="TestPlugin.h" />
+    <ClInclude Include="utils\module.h" />
+    <ClInclude Include="utils\plat.h" />
+    <ClInclude Include="utils\plat_win.h" />
+    <ClInclude Include="utils\virtual.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AMBuilder" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

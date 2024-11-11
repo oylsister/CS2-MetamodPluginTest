@@ -14,10 +14,13 @@ for sdk_target in MMSPlugin.sdk_targets:
 
   binary.sources += [
     'TestPlugin.cpp',
+    'Event.cpp',
   ]
 
   binary.compiler.cxxincludes += [
     os.path.join(builder.sourcePath, 'protobuf', 'generated'),
+    os.path.join(builder.sourcePath, 'sdk'),
+    os.path.join(builder.sourcePath, 'utils'),
   ]
 
   nodes = builder.Add(binary)

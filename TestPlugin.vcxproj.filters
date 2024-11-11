@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="E:\Github\metamod\hl2sdks\hl2sdk-cs2\public\tier0\memoverride.cpp" />
+    <ClCompile Include="E:\Github\metamod\hl2sdks\hl2sdk-cs2\tier1\convar.cpp" />
+    <ClCompile Include="E:\Github\CS2-MetamodPluginTest\TestPlugin.cpp" />
+    <ClCompile Include="Event.cpp" />
+    <ClCompile Include="sdk\schema.cpp" />
+    <ClCompile Include="utils\plat_unix.cpp" />
+    <ClCompile Include="utils\plat_win.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header">
+      <UniqueIdentifier>{71beff24-28d6-4791-9771-fca690aa3a87}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestPlugin.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="serversideclient.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="clientframe.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="netmessage.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\entity\cbaseplayercontroller.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\entity\cbaseentity.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\entity\ccsplayercontroller.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk\schema.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\plat.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\module.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\virtual.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\plat_win.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AMBuilder" />
+  </ItemGroup>
+</Project>

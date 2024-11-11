@@ -18,6 +18,7 @@
 #include <ISmmPlugin.h>
 #include <igameevents.h>
 #include <sh_vector.h>
+#include "networksystem/inetworkserializer.h"
 
 class TestPlugin : public ISmmPlugin, public IMetamodListener
 {
@@ -27,6 +28,8 @@ public:
 	bool Pause(char *error, size_t maxlen);
 	bool Unpause(char *error, size_t maxlen);
 	void AllPluginsLoaded();
+	void Hook_PostEvent(CSplitScreenSlot nSlot, bool bLocalOnly, int nClientCount, const uint64* clients,
+		INetworkMessageInternal* pEvent, const CNetMessage* pData, unsigned long nSize, NetChannelBufType_t bufType);
 public: //hooks
 	void OnLevelInit( char const *pMapName,
 				 char const *pMapEntities,
@@ -43,6 +46,8 @@ public: //hooks
 	void Hook_OnClientConnected( CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, const char *pszAddress, bool bFakePlayer );
 	bool Hook_ClientConnect( CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, bool unk1, CBufferString *pRejectReason );
 	void Hook_ClientCommand( CPlayerSlot nSlot, const CCommand &_cmd );
+	void Hook_StartupServer(const GameSessionConfiguration_t& config, ISource2WorldSession* pSession, const char* pszMapName);
+
 public:
 	const char *GetAuthor();
 	const char *GetName();
