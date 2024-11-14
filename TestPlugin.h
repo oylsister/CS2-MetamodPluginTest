@@ -18,7 +18,8 @@
 #include <ISmmPlugin.h>
 #include <igameevents.h>
 #include <sh_vector.h>
-#include "networksystem/inetworkserializer.h"
+#include <recipientfilter.h>
+#include "networksystem/inetworkmessages.h"
 
 class TestPlugin : public ISmmPlugin, public IMetamodListener
 {

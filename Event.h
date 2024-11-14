@@ -3,6 +3,7 @@
 #include "utlstring.h"
 #include "utlvector.h"
 #include "igameevents.h"
+#include "networksystem/inetworkserializer.h"
 
 typedef void (*FnEventListenerCallback)(IGameEvent* event);
 

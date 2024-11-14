@@ -1,5 +1,6 @@
 #pragma once
 #include "Event.h"
+#include "netmessages.pb.h"
 
 extern IGameEventManager2 *g_EventManager;
 

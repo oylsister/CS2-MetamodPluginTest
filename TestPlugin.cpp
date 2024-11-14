@@ -16,7 +16,9 @@
 #include "TestPlugin.h"
 #include "iserver.h"
 #include "engine/igameeventsystem.h"
+#include "interfaces/interfaces.h"
 #include <Event.h>
+#include "netmessages.pb.h"
 
 class GameSessionConfiguration_t { };
 
@@ -95,6 +97,7 @@ bool TestPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bo
 	GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 	GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
 	GET_V_IFACE_ANY(GetEngineFactory, g_gameEventSystem, IGameEventSystem, GAMEEVENTSYSTEM_INTERFACE_VERSION);
+	GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkMessages, INetworkMessages, NETWORKMESSAGES_INTERFACE_VERSION);
 
 	// Currently doesn't work from within mm side, use GetGameGlobals() in the mean time instead
 	// gpGlobals = ismm->GetCGlobals();
@@ -187,6 +190,37 @@ void TestPlugin::Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, 
 void TestPlugin::Hook_ClientDisconnect( CPlayerSlot slot, ENetworkDisconnectionReason reason, const char *pszName, uint64 xuid, const char *pszNetworkID )
 {
 	META_CONPRINTF( "Hook_ClientDisconnect(%d, %d, \"%s\", %d, \"%s\")\n", slot, reason, pszName, xuid, pszNetworkID );
+}
+
+void SendVoiceMessage()
+{
+	INetworkMessageInternal* pNetMsg = g_pNetworkMessages->FindNetworkMessagePartial("VoiceData");
+
+	auto data = pNetMsg->AllocateMessage()->ToPB<CSVCMsg_VoiceData>();
+	auto audio = pNetMsg->AllocateMessage()->ToPB<CMsgVoiceAudio>();
+
+	CRecipientFilter* filter{};
+
+	static void (IGameEventSystem:: * PostEventAbstract)(CSplitScreenSlot, bool, IRecipientFilter*, INetworkMessageInternal*, const CNetMessage*, unsigned long) = &IGameEventSystem::PostEventAbstract;
+
+	filter->AddAllPlayers();
+
+	audio->set_format(VOICEDATA_FORMAT_ENGINE);
+	audio->set_voice_data(0);
+	audio->set_section_number(0);
+	audio->set_section_number(0);
+	audio->set_sample_rate(0);
+	audio->set_uncompressed_sample_offset(0);
+	
+	data->set_allocated_audio(audio);
+	data->set_client(-1);
+	data->set_proximity(true);
+	data->set_xuid(0);
+	data->set_audible_mask(0);
+	data->set_tick(0);
+	data->set_passthrough(0);
+
+	SH_CALL(g_gameEventSystem, PostEventAbstract)(0, false, filter, pNetMsg, data, 0);
 }
 
 void TestPlugin::Hook_GameFrame( bool simulating, bool bFirstTick, bool bLastTick )
