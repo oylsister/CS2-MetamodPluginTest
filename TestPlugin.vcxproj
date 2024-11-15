@@ -65,6 +65,7 @@
     <ClCompile Include="E:\Github\CS2-MetamodPluginTest\TestPlugin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TestPlugin.h" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

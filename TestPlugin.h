@@ -18,6 +18,10 @@
 #include <ISmmPlugin.h>
 #include <igameevents.h>
 #include <sh_vector.h>
+#include <recipientfilter.h>
+#include <igameeventsystem.h>
+ //#include "engine/igameeventsystem.h"
+#include "networksystem/inetworkmessages.h"
 
 class TestPlugin : public ISmmPlugin, public IMetamodListener
 {
@@ -35,14 +39,9 @@ public: //hooks
 				 bool loadGame,
 				 bool background );
 	void OnLevelShutdown();
-	void Hook_GameFrame( bool simulating, bool bFirstTick, bool bLastTick );
-	void Hook_ClientActive( CPlayerSlot slot, bool bLoadGame, const char *pszName, uint64 xuid );
 	void Hook_ClientDisconnect( CPlayerSlot slot, ENetworkDisconnectionReason reason, const char *pszName, uint64 xuid, const char *pszNetworkID );
 	void Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, int type, uint64 xuid );
-	void Hook_ClientSettingsChanged( CPlayerSlot slot );
-	void Hook_OnClientConnected( CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, const char *pszAddress, bool bFakePlayer );
-	bool Hook_ClientConnect( CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, bool unk1, CBufferString *pRejectReason );
-	void Hook_ClientCommand( CPlayerSlot nSlot, const CCommand &_cmd );
+
 public:
 	const char *GetAuthor();
 	const char *GetName();

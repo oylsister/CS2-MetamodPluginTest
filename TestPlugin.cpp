@@ -15,19 +15,14 @@
 #include <stdio.h>
 #include "TestPlugin.h"
 #include "iserver.h"
+#include "netmessages.pb.h"
 
-SH_DECL_HOOK3_void(IServerGameDLL, GameFrame, SH_NOATTRIB, 0, bool, bool, bool);
-SH_DECL_HOOK4_void(IServerGameClients, ClientActive, SH_NOATTRIB, 0, CPlayerSlot, bool, const char *, uint64);
 SH_DECL_HOOK5_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, CPlayerSlot, ENetworkDisconnectionReason, const char *, uint64, const char *);
 SH_DECL_HOOK4_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, CPlayerSlot, char const *, int, uint64);
-SH_DECL_HOOK1_void(IServerGameClients, ClientSettingsChanged, SH_NOATTRIB, 0, CPlayerSlot );
-SH_DECL_HOOK6_void(IServerGameClients, OnClientConnected, SH_NOATTRIB, 0, CPlayerSlot, const char*, uint64, const char *, const char *, bool);
-SH_DECL_HOOK6(IServerGameClients, ClientConnect, SH_NOATTRIB, 0, bool, CPlayerSlot, const char*, uint64, const char *, bool, CBufferString *);
-SH_DECL_HOOK2(IGameEventManager2, FireEvent, SH_NOATTRIB, 0, bool, IGameEvent *, bool);
-
-SH_DECL_HOOK2_void( IServerGameClients, ClientCommand, SH_NOATTRIB, 0, CPlayerSlot, const CCommand & );
+SH_DECL_HOOK8_void(IGameEventSystem, PostEventAbstract, SH_NOATTRIB, 0, CSplitScreenSlot, bool, int, const uint64*, INetworkMessageInternal*, const CNetMessage*, unsigned long, NetChannelBufType_t)
 
 TestPlugin g_TestPlugin;
+IGameEventSystem* g_gameEventSystem = nullptr;
 IServerGameDLL *server = NULL;
 IServerGameClients *gameclients = NULL;
 IVEngineServer *engine = NULL;
@@ -51,11 +46,6 @@ CGlobalVars *GetGameGlobals()
 ConVar sample_cvar("sample_cvar", "42", 0);
 #endif
 
-CON_COMMAND_F(sample_command, "Sample command", FCVAR_NONE)
-{
-	META_CONPRINTF( "Sample command called by %d. Command: %s\n", context.GetPlayerSlot(), args.GetCommandString() );
-}
-
 PLUGIN_EXPOSE(TestPlugin, g_TestPlugin);
 bool TestPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
@@ -66,6 +56,7 @@ bool TestPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bo
 	GET_V_IFACE_ANY(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 	GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
+	GET_V_IFACE_ANY(GetEngineFactory, g_gameEventSystem, IGameEventSystem, GAMEEVENTSYSTEM_INTERFACE_VERSION);
 
 	// Currently doesn't work from within mm side, use GetGameGlobals() in the mean time instead
 	// gpGlobals = ismm->GetCGlobals();
@@ -75,14 +66,8 @@ bool TestPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bo
 
 	META_CONPRINTF( "Starting plugin.\n" );
 
-	SH_ADD_HOOK(IServerGameDLL, GameFrame, server, SH_MEMBER(this, &TestPlugin::Hook_GameFrame), true);
-	SH_ADD_HOOK(IServerGameClients, ClientActive, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientActive), true);
 	SH_ADD_HOOK(IServerGameClients, ClientDisconnect, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientDisconnect), true);
 	SH_ADD_HOOK(IServerGameClients, ClientPutInServer, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientPutInServer), true);
-	SH_ADD_HOOK(IServerGameClients, ClientSettingsChanged, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientSettingsChanged), false);
-	SH_ADD_HOOK(IServerGameClients, OnClientConnected, gameclients, SH_MEMBER(this, &TestPlugin::Hook_OnClientConnected), false);
-	SH_ADD_HOOK(IServerGameClients, ClientConnect, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientConnect), false);
-	SH_ADD_HOOK(IServerGameClients, ClientCommand, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientCommand), false);
 
 	META_CONPRINTF( "All hooks started!\n" );
 
@@ -94,14 +79,8 @@ bool TestPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bo
 
 bool TestPlugin::Unload(char *error, size_t maxlen)
 {
-	SH_REMOVE_HOOK(IServerGameDLL, GameFrame, server, SH_MEMBER(this, &TestPlugin::Hook_GameFrame), true);
-	SH_REMOVE_HOOK(IServerGameClients, ClientActive, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientActive), true);
 	SH_REMOVE_HOOK(IServerGameClients, ClientDisconnect, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientDisconnect), true);
 	SH_REMOVE_HOOK(IServerGameClients, ClientPutInServer, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientPutInServer), true);
-	SH_REMOVE_HOOK(IServerGameClients, ClientSettingsChanged, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientSettingsChanged), false);
-	SH_REMOVE_HOOK(IServerGameClients, OnClientConnected, gameclients, SH_MEMBER(this, &TestPlugin::Hook_OnClientConnected), false);
-	SH_REMOVE_HOOK(IServerGameClients, ClientConnect, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientConnect), false);
-	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, gameclients, SH_MEMBER(this, &TestPlugin::Hook_ClientCommand), false);
 
 	return true;
 }
@@ -113,31 +92,26 @@ void TestPlugin::AllPluginsLoaded()
 	 */
 }
 
-void TestPlugin::Hook_ClientActive( CPlayerSlot slot, bool bLoadGame, const char *pszName, uint64 xuid )
+void SendVoiceData(CMsgVoiceAudio *audio)
 {
-	META_CONPRINTF( "Hook_ClientActive(%d, %d, \"%s\", %d)\n", slot, bLoadGame, pszName, xuid );
-}
+	INetworkMessageInternal* pNetMsg = g_pNetworkMessages->FindNetworkMessagePartial("VoiceData");
 
-void TestPlugin::Hook_ClientCommand( CPlayerSlot slot, const CCommand &args )
-{
-	META_CONPRINTF( "Hook_ClientCommand(%d, \"%s\")\n", slot, args.GetCommandString() );
-}
+	static void (IGameEventSystem:: * PostEventAbstract)(CSplitScreenSlot, bool, IRecipientFilter*, INetworkMessageInternal*, const CNetMessage*, unsigned long) = &IGameEventSystem::PostEventAbstract;
 
-void TestPlugin::Hook_ClientSettingsChanged( CPlayerSlot slot )
-{
-	META_CONPRINTF( "Hook_ClientSettingsChanged(%d)\n", slot );
-}
+	auto data = pNetMsg->AllocateMessage()->ToPB<CSVCMsg_VoiceData>();
 
-void TestPlugin::Hook_OnClientConnected( CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, const char *pszAddress, bool bFakePlayer )
-{
-	META_CONPRINTF( "Hook_OnClientConnected(%d, \"%s\", %d, \"%s\", \"%s\", %d)\n", slot, pszName, xuid, pszNetworkID, pszAddress, bFakePlayer );
-}
+	CRecipientFilter* filter{};
+	filter->AddAllPlayers();
 
-bool TestPlugin::Hook_ClientConnect( CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, bool unk1, CBufferString *pRejectReason )
-{
-	META_CONPRINTF( "Hook_ClientConnect(%d, \"%s\", %d, \"%s\", %d, \"%s\")\n", slot, pszName, xuid, pszNetworkID, unk1, pRejectReason->ToGrowable()->Get() );
+	data->set_allocated_audio(audio);
+	data->set_client(-1);
+	data->set_proximity(true);
+	data->set_xuid(0);
+	data->set_audible_mask(0);
+	data->set_tick(0);
+	data->set_passthrough(0);
 
-	RETURN_META_VALUE(MRES_IGNORED, true);
+	SH_CALL(g_gameEventSystem, PostEventAbstract)(0, false, filter, pNetMsg, data, 0);
 }
 
 void TestPlugin::Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, int type, uint64 xuid )
@@ -148,16 +122,6 @@ void TestPlugin::Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, 
 void TestPlugin::Hook_ClientDisconnect( CPlayerSlot slot, ENetworkDisconnectionReason reason, const char *pszName, uint64 xuid, const char *pszNetworkID )
 {
 	META_CONPRINTF( "Hook_ClientDisconnect(%d, %d, \"%s\", %d, \"%s\")\n", slot, reason, pszName, xuid, pszNetworkID );
-}
-
-void TestPlugin::Hook_GameFrame( bool simulating, bool bFirstTick, bool bLastTick )
-{
-	/**
-	 * simulating:
-	 * ***********
-	 * true  | game is ticking
-	 * false | game is not ticking
-	 */
 }
 
 void TestPlugin::OnLevelInit( char const *pMapName,
