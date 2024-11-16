@@ -94,7 +94,7 @@ void TestPlugin::AllPluginsLoaded()
 
 void SendVoiceData(CMsgVoiceAudio *audio)
 {
-	INetworkMessageInternal* pNetMsg = g_pNetworkMessages->FindNetworkMessagePartial("VoiceData");
+	INetworkMessageInternal* pNetMsg = g_pNetworkMessages->FindNetworkMessageById(47);
 
 	static void (IGameEventSystem:: * PostEventAbstract)(CSplitScreenSlot, bool, IRecipientFilter*, INetworkMessageInternal*, const CNetMessage*, unsigned long) = &IGameEventSystem::PostEventAbstract;
 
