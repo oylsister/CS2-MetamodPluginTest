@@ -60,14 +60,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="E:\Github\metamod\hl2sdks\hl2sdk-cs2\public\tier0\memoverride.cpp" />
-    <ClCompile Include="E:\Github\metamod\hl2sdks\hl2sdk-cs2\tier1\convar.cpp" />
+    <ClCompile Include="audiocode.cpp" />
     <ClCompile Include="E:\Github\CS2-MetamodPluginTest\TestPlugin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="recipientfilters.h" />
     <ClInclude Include="TestPlugin.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AMBuilder" />
+    <None Include="AMBuildScript" />
+    <None Include="PackageScript" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

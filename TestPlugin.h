@@ -16,11 +16,8 @@
 #define _INCLUDE_METAMOD_SOURCE_STUB_PLUGIN_H_
 
 #include <ISmmPlugin.h>
-#include <igameevents.h>
 #include <sh_vector.h>
-#include <recipientfilter.h>
-#include <igameeventsystem.h>
- //#include "engine/igameeventsystem.h"
+#include "recipientfilters.h"
 #include "networksystem/inetworkmessages.h"
 
 class TestPlugin : public ISmmPlugin, public IMetamodListener
@@ -41,6 +38,7 @@ public: //hooks
 	void OnLevelShutdown();
 	void Hook_ClientDisconnect( CPlayerSlot slot, ENetworkDisconnectionReason reason, const char *pszName, uint64 xuid, const char *pszNetworkID );
 	void Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, int type, uint64 xuid );
+	void Hook_PostEvent(CSplitScreenSlot nSlot, bool bLocalOnly, int nClientCount, const uint64* clients, INetworkMessageInternal* pEvent, const CNetMessage* pData, unsigned long nSize, NetChannelBufType_t bufType);
 
 public:
 	const char *GetAuthor();
