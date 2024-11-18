@@ -95,6 +95,32 @@ void TestPlugin::AllPluginsLoaded()
 	 */
 }
 
+void Message(const char* msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+
+	char buf[1024] = {};
+	V_vsnprintf(buf, sizeof(buf) - 1, msg, args);
+
+	ConColorMsg(Color(255, 0, 255, 255), "[Sympho] %s", buf);
+
+	va_end(args);
+}
+
+void Panic(const char* msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+
+	char buf[1024] = {};
+	V_vsnprintf(buf, sizeof(buf) - 1, msg, args);
+
+	Warning("[Sympho] %s", buf);
+
+	va_end(args);
+}
+
 void TestPlugin::Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, int type, uint64 xuid )
 {
 	//META_CONPRINTF( "Hook_ClientPutInServer(%d, \"%s\", %d, %d)\n", slot, pszName, type, xuid );
@@ -140,32 +166,6 @@ void LoadAudioConfig()
 		Panic("Failed to open %s. Sound file is not loaded\n", configPath);
 		return;
 	}
-}
-
-void Message(const char* msg, ...)
-{
-	va_list args;
-	va_start(args, msg);
-
-	char buf[1024] = {};
-	V_vsnprintf(buf, sizeof(buf) - 1, msg, args);
-
-	ConColorMsg(Color(255, 0, 255, 255), "[Sympho] %s", buf);
-
-	va_end(args);
-}
-
-void Panic(const char* msg, ...)
-{
-	va_list args;
-	va_start(args, msg);
-
-	char buf[1024] = {};
-	V_vsnprintf(buf, sizeof(buf) - 1, msg, args);
-
-	Warning("[Sympho] %s", buf);
-
-	va_end(args);
 }
 
 void TestPlugin::OnLevelInit( char const *pMapName,

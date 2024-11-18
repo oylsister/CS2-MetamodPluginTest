@@ -61,7 +61,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="audiocode.cpp" />
-    <ClCompile Include="E:\Github\CS2-MetamodPluginTest\TestPlugin.cpp" />
+    <ClCompile Include="DataSound.cpp" />
+    <ClCompile Include="TestPlugin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="recipientfilters.h" />
