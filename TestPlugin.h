@@ -28,16 +28,8 @@ public:
 	bool Pause(char *error, size_t maxlen);
 	bool Unpause(char *error, size_t maxlen);
 	void AllPluginsLoaded();
-public: //hooks
-	void OnLevelInit( char const *pMapName,
-				 char const *pMapEntities,
-				 char const *pOldLevel,
-				 char const *pLandmarkName,
-				 bool loadGame,
-				 bool background );
-	void OnLevelShutdown();
-	void Hook_ClientDisconnect( CPlayerSlot slot, ENetworkDisconnectionReason reason, const char *pszName, uint64 xuid, const char *pszNetworkID );
-	void Hook_ClientPutInServer( CPlayerSlot slot, char const *pszName, int type, uint64 xuid );
+
+public:
 	void Hook_PostEvent(CSplitScreenSlot nSlot, bool bLocalOnly, int nClientCount, const uint64* clients, INetworkMessageInternal* pEvent, const CNetMessage* pData, unsigned long nSize, NetChannelBufType_t bufType);
 
 public:
